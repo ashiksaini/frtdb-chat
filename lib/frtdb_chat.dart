@@ -1,7 +1,1 @@
-library frtdb_chat;
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/frtdb_chat_utils.dart';
