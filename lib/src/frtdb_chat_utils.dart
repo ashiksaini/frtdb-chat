@@ -34,7 +34,7 @@ class FRTDBChatUtils {
   void sendMessage(String channelId, dynamic message, dynamic metaInfo) => _writeDB(channelId, message, metaInfo);
 
   /// Fetch chats
-  void fetchMessage({String? channelId}) => _readDB(channelId!);
+  Future<List<dynamic>> fetchMessage({String? channelId}) => _readDB(channelId!);
 
   /// Return a meta information for the given [channelId]
   Future<dynamic> metaInfo(String? channelId) async {
@@ -51,6 +51,24 @@ class FRTDBChatUtils {
   /// Set the meta to last pushed message.
   void updateMetaInfo(String channelId, dynamic metaInfo) async {
     await _firebaseDatabase.child(channelId).child('meta').set(metaInfo);
+  }
+
+  /// Check channel existence
+  Future<bool> isChannelExists(String channelId) async {
+    var data = await _firebaseDatabase.child(channelId).once();
+    
+    if(data.snapshot.exists) {
+      return true;
+    }
+
+    log.info('Channel Exists : ${data.snapshot.exists}');
+    return false;
+  }
+
+  void chatListener(String channelId) {
+    _firebaseDatabase.child(channelId).child('chats').onChildAdded.listen((event) {
+      log.info('lastest chat : ${event.snapshot.value}');
+    });
   }
 
   /******************************************************************************************************************** */
