@@ -77,7 +77,13 @@ class FRTDBChatUtils {
   /// Write to DB
   void _writeDB(String channelId, dynamic message, dynamic metaInfo) async {
     /// Push the last message to
-    await _firebaseDatabase.child(channelId).child('chats').push().set(message);
+    final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
+    
+    /// Set message id
+    message.messageId = messageReference.key; 
+   
+    /// Set message
+    messageReference.set(message);
 
     /// Update the meta info of the chat.
     updateMetaInfo(channelId, message);
@@ -100,4 +106,9 @@ class FRTDBChatUtils {
     log.info('Total Chats : ${chats.length}');
     return chats;
   }
+
+  /// Update message
+  // void updateMessage() {
+  //   _firebaseDatabase.
+  // }
 }
