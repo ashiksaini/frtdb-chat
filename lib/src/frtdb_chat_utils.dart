@@ -80,7 +80,7 @@ class FRTDBChatUtils {
     final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
     
     /// Set message id
-    message.messageId = messageReference.key; 
+    message['message_id'] = messageReference.key; 
    
     /// Set message
     messageReference.set(message);

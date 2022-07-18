@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "message": "Hello00000000000000000 Ashik Saini",
       "receipt": 'read',
       "time": '3',
+      "message_id": '',
     };
 
     var metaInfo = {
@@ -72,9 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
       'message' : message['message']
     };
 
-    // _firebaseDatabase.sendMessage("8440-8441", message, metaInfo);
+    _firebaseDatabase.sendMessage("8440-8441", message, metaInfo);
     _firebaseDatabase.fetchMessage(channelId: '8440-8441');
-    // _firebaseDatabase.metaInfo('8440-8441');
+    _firebaseDatabase.metaInfo('8440-8441');
 
   }
 
