@@ -26,12 +26,15 @@ class FRTDBChatUtils {
   /// Firebase database instance
   late final DatabaseReference _firebaseDatabase;
 
+  late final DatabaseReference firebaseDatabaseRef;
+
   FRTDBChatUtils(String refUrl) {
     _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('user_chats');
+    firebaseDatabaseRef = _firebaseDatabase;
   }
 
   /// Send message
-  void sendMessage(String channelId, dynamic message, dynamic metaInfo) => _writeDB(channelId, message, metaInfo);
+  Future<String> sendMessage(String channelId, dynamic message, dynamic metaInfo) => _writeDB(channelId, message, metaInfo);
 
   /// Fetch chats
   Future<List<dynamic>> fetchMessage({String? channelId}) => _readDB(channelId!);
@@ -65,17 +68,30 @@ class FRTDBChatUtils {
     return false;
   }
 
-  void chatListener(String channelId) {
-    _firebaseDatabase.child(channelId).child('chats').onChildAdded.listen((event) {
+  Future<dynamic> chatListener(String channelId) async {
+    dynamic data;
+    firebaseDatabaseRef.child(channelId).child('chats').limitToLast(1) .onChildAdded.listen((event) {
       log.info('lastest chat : ${event.snapshot.value}');
+      data = event.snapshot.value;
     });
+
+    print("asdfd"+ data.toString());
+    return data;
+  }
+
+  void sendFiles(String channelId, String chatId, dynamic file) {
+    /// Push the last message to
+    final messageReference = _firebaseDatabase.child(channelId).child('chats').child(channelId).child('files').push().set(file);
+
+    /// Update the meta info of the chat.
+    updateMetaInfo(channelId, 'File');
   }
 
   /******************************************************************************************************************** */
   /// DB util fuction
 
   /// Write to DB
-  void _writeDB(String channelId, dynamic message, dynamic metaInfo) async {
+  Future<String> _writeDB(String channelId, dynamic message, dynamic metaInfo) async {
     /// Push the last message to
     final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
     
@@ -87,6 +103,8 @@ class FRTDBChatUtils {
 
     /// Update the meta info of the chat.
     updateMetaInfo(channelId, message);
+
+    return messageReference.key!;
   }
 
   /// Read DB

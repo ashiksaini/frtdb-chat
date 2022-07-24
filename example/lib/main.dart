@@ -49,11 +49,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late FRTDBChatUtils _firebaseDatabase;
+
   @override
   void initState() {
     super.initState();
 
-    FRTDBChatUtils _firebaseDatabase = FRTDBChatUtils('https://fir-chat-a0a69-default-rtdb.firebaseio.com/');
+    _firebaseDatabase = FRTDBChatUtils('https://fir-chat-a0a69-default-rtdb.firebaseio.com/');
 
     var message = {
       "sender_id": 8440,
@@ -61,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
       "receiver_id": 8441,
       "receiver_name": 'Pankaj Jain',
       "message_type": 'text',
-      "message": "Hello00000000000000000 Ashik Saini",
+      "message": "ni adfasdfad afsdfasdfa aana",
       "receipt": 'read',
-      "time": '3',
+      "time": '100000000',
       "message_id": '',
     };
 
@@ -74,9 +76,19 @@ class _MyHomePageState extends State<MyHomePage> {
     };
 
     _firebaseDatabase.sendMessage("8440-8441", message, metaInfo);
-    _firebaseDatabase.fetchMessage(channelId: '8440-8441');
-    _firebaseDatabase.metaInfo('8440-8441');
+    // _firebaseDatabase.metaInfo('8440-8441');
 
+    getChats();
+
+    // _firebaseDatabase.chatListener('8440-8441');
+
+  }
+
+  getChats() async {
+    _firebaseDatabase.firebaseDatabaseRef.child('8440-8441').child('chats').limitToLast(1) .onChildAdded.listen((event) {
+      log.info('lastest chat : ${event.snapshot.value}');
+      // data = event.snapshot.value;
+    });
   }
 
   @override
