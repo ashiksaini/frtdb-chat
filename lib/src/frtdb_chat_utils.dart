@@ -30,7 +30,8 @@ class FRTDBChatUtils {
   late final DatabaseReference firebaseDatabaseRef;
 
   FRTDBChatUtils(String refUrl) {
-    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('x ');
+    ApiRepository();
+    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('user_chats');
     firebaseDatabaseRef = _firebaseDatabase;
   }
 
