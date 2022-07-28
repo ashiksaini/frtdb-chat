@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:frtdb_chat/src/services/repository.dart';
 import 'package:logging/logging.dart';
 
 /// Reatime Time Chat Solution
@@ -29,7 +30,7 @@ class FRTDBChatUtils {
   late final DatabaseReference firebaseDatabaseRef;
 
   FRTDBChatUtils(String refUrl) {
-    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('user_chats');
+    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('x ');
     firebaseDatabaseRef = _firebaseDatabase;
   }
 
@@ -68,25 +69,29 @@ class FRTDBChatUtils {
     return false;
   }
 
-  Future<dynamic> chatListener(String channelId) async {
-    dynamic data;
-    firebaseDatabaseRef.child(channelId).child('chats').limitToLast(1) .onChildAdded.listen((event) {
-      log.info('lastest chat : ${event.snapshot.value}');
-      data = event.snapshot.value;
-    });
+  /// Send notification
+  Future<dynamic> sendNotification({String? token, String? message}) async {
+    dynamic result = await ApiRepository.sendNotification(token!, message!);
 
-    print("asdfd"+ data.toString());
-    return data;
+    return result;
   }
+  
+  /// Fetch more chats
+  Future<List<dynamic>> fetchMoreMessage({String? channelId, String? lastMessageId}) async {
+    List<dynamic> chats = [];
+    var snapshot = await _firebaseDatabase.child(channelId!).child('chats').endBefore(lastMessageId).limitToLast(5).get();
 
-  void sendFiles(String channelId, String chatId, dynamic file) {
-    /// Push the last message to
-    final messageReference = _firebaseDatabase.child(channelId).child('chats').child(channelId).child('files').push().set(file);
+    if (snapshot.exists) {
+      for (var chat in snapshot.children) {
+        chats.add(chat.value);
+      }
+    } else {
+      log.shout('No data available.');
+    }
 
-    /// Update the meta info of the chat.
-    updateMetaInfo(channelId, 'File');
+    log.info('Total Chats : ${chats.length}');
+    return chats;
   }
-
   /******************************************************************************************************************** */
   /// DB util fuction
 
@@ -111,7 +116,7 @@ class FRTDBChatUtils {
   Future<List<dynamic>> _readDB(String channelId) async {
     List<dynamic> chats = [];
 
-    var snapshot = await _firebaseDatabase.child(channelId).child('chats').get();
+    var snapshot = await _firebaseDatabase.child(channelId).child('chats').limitToLast(5).get();
 
     if (snapshot.exists) {
       for (var chat in snapshot.children) {
