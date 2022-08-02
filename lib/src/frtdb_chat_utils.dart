@@ -49,7 +49,7 @@ class FRTDBChatUtils {
       metaData = value.snapshot.value;
     });
 
-    log.info('Meta Info : $metaData');
+    print('Meta Info : $metaData');
     return metaData;
   }
 
@@ -66,12 +66,12 @@ class FRTDBChatUtils {
       return true;
     }
 
-    log.info('Channel Exists : ${data.snapshot.exists}');
+    print('Channel Exists : ${data.snapshot.exists}');
     return false;
   }
 
   /// Send notification
-  Future<dynamic> sendNotification({String? token, String? message}) async {
+  Future<dynamic> sendNotification({String? token, dynamic? message}) async {
     dynamic result = await ApiRepository.sendNotification(token!, message!);
 
     return result;
@@ -87,12 +87,13 @@ class FRTDBChatUtils {
         chats.add(chat.value);
       }
     } else {
-      log.shout('No data available.');
+      print('No data available.');
     }
 
-    log.info('Total Chats : ${chats.length}');
+    print('Total Chats : ${chats.length}');
     return chats;
   }
+
   /******************************************************************************************************************** */
   /// DB util fuction
 
@@ -117,17 +118,17 @@ class FRTDBChatUtils {
   Future<List<dynamic>> _readDB(String channelId) async {
     List<dynamic> chats = [];
 
-    var snapshot = await _firebaseDatabase.child(channelId).child('chats').limitToLast(5).get();
+    var snapshot = await _firebaseDatabase.child(channelId).child('chats').get();
 
     if (snapshot.exists) {
       for (var chat in snapshot.children) {
         chats.add(chat.value);
       }
     } else {
-      log.shout('No data available.');
+      print('No data available.');
     }
 
-    log.info('Total Chats : ${chats.length}');
+    print('Total Chats : ${chats.length}');
     return chats;
   }
 
