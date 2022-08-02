@@ -43,40 +43,55 @@ class FRTDBChatUtils {
 
   /// Return a meta information for the given [channelId]
   Future<dynamic> metaInfo(String? channelId) async {
-    dynamic metaData;
+    try {
+      dynamic metaData;
 
-    await _firebaseDatabase.child(channelId!).child('meta').once().then((value) {
-      metaData = value.snapshot.value;
-    });
+      await _firebaseDatabase.child(channelId!).child('meta').once().then((value) {
+        metaData = value.snapshot.value;
+      });
 
-    print('Meta Info : $metaData');
-    return metaData;
+      print('Meta Info : $metaData');
+      return metaData;
+    } catch(error) {
+      print('Error: $error');
+      rethrow;
+    }
   }
 
   /// Set the meta to last pushed message.
   void updateMetaInfo(String channelId, dynamic metaInfo) async {
-    await _firebaseDatabase.child(channelId).child('meta').set(metaInfo);
+    try {
+      await _firebaseDatabase.child(channelId).child('meta').set(metaInfo);
+    } catch (error) {
+      print('Error: $error');
+      rethrow;
+    }
   }
 
   /// Check channel existence
   Future<bool> isChannelExists(String channelId) async {
     var data = await _firebaseDatabase.child(channelId).once();
-    
-    if(data.snapshot.exists) {
+
+    if (data.snapshot.exists) {
       return true;
     }
 
-    print('Channel Exists : ${data.snapshot.exists}');
+    log.info('Channel Exists : ${data.snapshot.exists}');
     return false;
   }
 
   /// Send notification
-  Future<dynamic> sendNotification({String? token, dynamic? message}) async {
-    dynamic result = await ApiRepository.sendNotification(token!, message!);
+  Future<dynamic> sendNotification({String? token, String? message}) async {
+    try {
+      dynamic result = await ApiRepository.sendNotification(token!, message!);
 
-    return result;
+      return result;
+    } catch(error) {
+      print('Error: $error');
+      rethrow;
+    }
   }
-  
+
   /// Fetch more chats
   Future<List<dynamic>> fetchMoreMessage({String? channelId, String? lastMessageId}) async {
     List<dynamic> chats = [];
@@ -87,10 +102,10 @@ class FRTDBChatUtils {
         chats.add(chat.value);
       }
     } else {
-      print('No data available.');
+      log.shout('No data available.');
     }
 
-    print('Total Chats : ${chats.length}');
+    log.info('Total Chats : ${chats.length}');
     return chats;
   }
 
@@ -99,41 +114,41 @@ class FRTDBChatUtils {
 
   /// Write to DB
   Future<String> _writeDB(String channelId, dynamic message, dynamic metaInfo) async {
-    /// Push the last message to
-    final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
-    
-    /// Set message id
-    message['message_id'] = messageReference.key; 
-   
-    /// Set message
-    messageReference.set(message);
+    try {
+      /// Push the last message to
+      final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
 
-    /// Update the meta info of the chat.
-    updateMetaInfo(channelId, message);
+      /// Set message id
+      message['message_id'] = messageReference.key;
 
-    return messageReference.key!;
+      /// Set message
+      messageReference.set(message);
+
+      /// Update the meta info of the chat.
+      updateMetaInfo(channelId, message);
+
+      return messageReference.key!;
+    } catch (error) {
+      print('Error: $error');
+      rethrow;
+    }
   }
 
   /// Read DB
   Future<List<dynamic>> _readDB(String channelId) async {
-    List<dynamic> chats = [];
+    try {
+      var snapshot = await _firebaseDatabase.child(channelId).child('chats').get();
 
-    var snapshot = await _firebaseDatabase.child(channelId).child('chats').get();
-
-    if (snapshot.exists) {
-      for (var chat in snapshot.children) {
-        chats.add(chat.value);
+      if (snapshot.exists) {
+        print('Total Chats : ${snapshot.children.length}');
+        return snapshot.children.toList();
+      } else {
+        print('No data available.');
+        return [];
       }
-    } else {
-      print('No data available.');
+    } catch (error) {
+      print('Error : $error');
+      rethrow;
     }
-
-    print('Total Chats : ${chats.length}');
-    return chats;
   }
-
-  /// Update message
-  // void updateMessage() {
-  //   _firebaseDatabase.
-  // }
 }

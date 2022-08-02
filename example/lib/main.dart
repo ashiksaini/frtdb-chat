@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    _firebaseDatabase = FRTDBChatUtils('https://fir-chat-a0a69-default-rtdb.firebaseio.com/');
+    _firebaseDatabase = FRTDBChatUtils("https://fir-chat-a0a69-default-rtdb.firebaseio.com/");
 
     var message = {
       "sender_id": 8440,
@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "receiver_id": 8441,
       "receiver_name": 'Pankaj Jain',
       "message_type": 'text',
-      "message": "ni adfasdfad afsdfasdfa aana",
+      "message": "123",
       "receipt": 'read',
       "time": '100000000',
       "message_id": '',
@@ -75,10 +75,13 @@ class _MyHomePageState extends State<MyHomePage> {
       'message' : message['message']
     };
 
-    _firebaseDatabase.sendMessage("8440-8441", message, metaInfo);
-    // _firebaseDatabase.metaInfo('8440-8441');
+    _firebaseDatabase.sendMessage("8440-8441", message, metaInfo).whenComplete(() => print("Message sent"));
+    _firebaseDatabase.fetchMessage(channelId: "8440-8441");
 
-    getChats();
+    _firebaseDatabase.metaInfo("8440-8441");
+    _firebaseDatabase.isChannelExists("8440-8441").then((value) => print("is Exist ${value.toString()}"));
+    
+    // getChats();
 
     // _firebaseDatabase.chatListener('8440-8441');
 
