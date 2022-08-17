@@ -44,13 +44,19 @@ class FRTDBChatUtils {
   /// Mark Online
   Future<List<dynamic>> markOnline({String? channelId, String? uuid}) async {
     try {
-      await _firebaseDatabase.child('user_chats').child(channelId!).child('presence').push().set(uuid);
-      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId).child('presence').get();
+      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('presence').get();
 
-      if(snapshot.exists) {
+      if (snapshot.exists) {
+        for (DataSnapshot data in snapshot.children) {
+          if (data.value.toString().compareTo(uuid!) == 0) {
+            await _firebaseDatabase.child('user_chats').child(channelId).child('presence').child(data.key!).remove();
+          }
+        }
+        await _firebaseDatabase.child('user_chats').child(channelId).child('presence').push().set(uuid);
         return snapshot.children.toList();
       } else {
-        return [];
+        await _firebaseDatabase.child('user_chats').child(channelId).child('presence').push().set(uuid);
+        return snapshot.children.toList();
       }
     } catch (error) {
       print("Error : $error");
@@ -63,8 +69,8 @@ class FRTDBChatUtils {
     try {
       DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('presence').get();
 
-      for(DataSnapshot data in snapshot.children) {
-        if(data.value.toString().compareTo(uuid!) == 0) {
+      for (DataSnapshot data in snapshot.children) {
+        if (data.value.toString().compareTo(uuid!) == 0) {
           await _firebaseDatabase.child('user_chats').child(channelId).child('presence').child(data.key!).remove();
         }
       }
@@ -75,14 +81,14 @@ class FRTDBChatUtils {
   }
 
   /// For Unread Msg
-  // Future<List<dynamic>> unreadMessagesCount() async {
-  //   try {
-
-  //   } catch (error) {
-  //     print("Error : $error");
-  //     rethrow;
-  //   }
-  // }
+  Future<void> unreadMessagesCount({String? currentUser, String? channelId, int? unreadMessagesCount}) async {
+    try {
+      await _firebaseDatabase.child('user_unread_message_counts/$currentUser/$channelId/unread_message_count').set(unreadMessagesCount);
+    } catch (error) {
+      print("Error : $error");
+      rethrow;
+    }
+  }
 
   /// Return a meta information for the given [channelId]
   Future<dynamic> metaInfo(String? channelId) async {
@@ -95,7 +101,7 @@ class FRTDBChatUtils {
 
       print('Meta Info : $metaData');
       return metaData;
-    } catch(error) {
+    } catch (error) {
       print('Error: $error');
       rethrow;
     }
@@ -129,7 +135,7 @@ class FRTDBChatUtils {
       dynamic result = await ApiRepository.sendNotification(token!, message!);
 
       return result;
-    } catch(error) {
+    } catch (error) {
       print('Error: $error');
       rethrow;
     }
