@@ -31,7 +31,7 @@ class FRTDBChatUtils {
 
   FRTDBChatUtils(String refUrl) {
     ApiRepository();
-    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl).child('user_chats');
+    _firebaseDatabase = FirebaseDatabase.instance.refFromURL(refUrl);
     firebaseDatabaseRef = _firebaseDatabase;
   }
 
@@ -41,12 +41,39 @@ class FRTDBChatUtils {
   /// Fetch chats
   Future<List<dynamic>> fetchMessage({String? channelId}) => _readDB(channelId!);
 
+  /// Mark Online
+  Future<List<dynamic>> markOnline({String? channelId, String? uuid}) async {
+    try {
+      await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').push().set(uuid);
+      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId).child('meta').child('presence').get();
+
+      if(snapshot.exists) {
+        return snapshot.children.toList();
+      } else {
+        return [];
+      }
+    } catch (error) {
+      print("Error : $error");
+      rethrow;
+    }
+  }
+
+  /// For Unread Msg
+  // Future<List<dynamic>> unreadMessagesCount() async {
+  //   try {
+
+  //   } catch (error) {
+  //     print("Error : $error");
+  //     rethrow;
+  //   }
+  // }
+
   /// Return a meta information for the given [channelId]
   Future<dynamic> metaInfo(String? channelId) async {
     try {
       dynamic metaData;
 
-      await _firebaseDatabase.child(channelId!).child('meta').once().then((value) {
+      await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').once().then((value) {
         metaData = value.snapshot.value;
       });
 
@@ -61,7 +88,7 @@ class FRTDBChatUtils {
   /// Set the meta to last pushed message.
   void updateMetaInfo(String channelId, dynamic metaInfo) async {
     try {
-      await _firebaseDatabase.child(channelId).child('meta').set(metaInfo);
+      await _firebaseDatabase.child('user_chats').child(channelId).child('meta').set(metaInfo);
     } catch (error) {
       print('Error: $error');
       rethrow;
@@ -70,7 +97,7 @@ class FRTDBChatUtils {
 
   /// Check channel existence
   Future<bool> isChannelExists(String channelId) async {
-    var data = await _firebaseDatabase.child(channelId).once();
+    var data = await _firebaseDatabase.child('user_chats').child(channelId).once();
 
     if (data.snapshot.exists) {
       return true;
@@ -81,7 +108,7 @@ class FRTDBChatUtils {
   }
 
   /// Send notification
-  Future<dynamic> sendNotification({String? token, String? message}) async {
+  Future<dynamic> sendNotification({String? token, dynamic? message}) async {
     try {
       dynamic result = await ApiRepository.sendNotification(token!, message!);
 
@@ -95,7 +122,7 @@ class FRTDBChatUtils {
   /// Fetch more chats
   Future<List<dynamic>> fetchMoreMessage({String? channelId, String? lastMessageId}) async {
     List<dynamic> chats = [];
-    var snapshot = await _firebaseDatabase.child(channelId!).child('chats').endBefore(lastMessageId).limitToLast(5).get();
+    var snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('chats').endBefore(lastMessageId).limitToLast(5).get();
 
     if (snapshot.exists) {
       for (var chat in snapshot.children) {
@@ -116,7 +143,7 @@ class FRTDBChatUtils {
   Future<String> _writeDB(String channelId, dynamic message, dynamic metaInfo) async {
     try {
       /// Push the last message to
-      final messageReference = _firebaseDatabase.child(channelId).child('chats').push();
+      final messageReference = _firebaseDatabase.child('user_chats').child(channelId).child('chats').push();
 
       /// Set message id
       message['message_id'] = messageReference.key;
@@ -137,7 +164,7 @@ class FRTDBChatUtils {
   /// Read DB
   Future<List<dynamic>> _readDB(String channelId) async {
     try {
-      var snapshot = await _firebaseDatabase.child(channelId).child('chats').get();
+      var snapshot = await _firebaseDatabase.child('user_chats').child(channelId).child('chats').get();
 
       if (snapshot.exists) {
         print('Total Chats : ${snapshot.children.length}');
