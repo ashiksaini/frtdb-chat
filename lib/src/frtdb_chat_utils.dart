@@ -58,6 +58,22 @@ class FRTDBChatUtils {
     }
   }
 
+  /// Mark offline
+  Future<void> markOffline({String? channelId, String? uuid}) async {
+    try {
+      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').get();
+
+      for(DataSnapshot data in snapshot.children) {
+        if(data.value.toString().compareTo(uuid!) == 0) {
+          await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').child(data.key!).remove();
+        }
+      }
+    } catch (error) {
+      print("Error : $error");
+      rethrow;
+    }
+  }
+
   /// For Unread Msg
   // Future<List<dynamic>> unreadMessagesCount() async {
   //   try {
