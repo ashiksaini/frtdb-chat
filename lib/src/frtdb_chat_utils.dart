@@ -44,8 +44,8 @@ class FRTDBChatUtils {
   /// Mark Online
   Future<List<dynamic>> markOnline({String? channelId, String? uuid}) async {
     try {
-      await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').push().set(uuid);
-      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId).child('meta').child('presence').get();
+      await _firebaseDatabase.child('user_chats').child(channelId!).child('presence').push().set(uuid);
+      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId).child('presence').get();
 
       if(snapshot.exists) {
         return snapshot.children.toList();
@@ -61,11 +61,11 @@ class FRTDBChatUtils {
   /// Mark offline
   Future<void> markOffline({String? channelId, String? uuid}) async {
     try {
-      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').get();
+      DataSnapshot snapshot = await _firebaseDatabase.child('user_chats').child(channelId!).child('presence').get();
 
       for(DataSnapshot data in snapshot.children) {
         if(data.value.toString().compareTo(uuid!) == 0) {
-          await _firebaseDatabase.child('user_chats').child(channelId!).child('meta').child('presence').child(data.key!).remove();
+          await _firebaseDatabase.child('user_chats').child(channelId).child('presence').child(data.key!).remove();
         }
       }
     } catch (error) {
