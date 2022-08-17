@@ -83,7 +83,8 @@ class FRTDBChatUtils {
   /// For Unread Msg
   Future<void> unreadMessagesCount({String? currentUser, String? channelId, int? unreadMessagesCount}) async {
     try {
-      await _firebaseDatabase.child('user_unread_message_counts/$currentUser/$channelId/unread_message_count').set(unreadMessagesCount);
+      print('$currentUser, $channelId, $unreadMessagesCount');
+      await _firebaseDatabase.child('user_unread_message_counts').child('/$currentUser/$channelId/unread_message_count').set(unreadMessagesCount);
     } catch (error) {
       print("Error : $error");
       rethrow;
