@@ -11,8 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   logging: ^1.0.2
-  firebase_core: ^1.20.0
-  firebase_database: ^9.1.0
+  firebase_core: ^1.19.1
+  firebase_database: ^9.0.18
   dio: ^4.0.6
 
 dev_dependencies:
