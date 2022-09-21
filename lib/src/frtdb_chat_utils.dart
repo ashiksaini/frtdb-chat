@@ -82,7 +82,7 @@ class FRTDBChatUtils {
 
   /// Dispose 
   Future<void> disposeChannel({String? channelId}) async {
-    await _firebaseDatabase.child(channelId!).remove();
+    await _firebaseDatabase.child('user_chats').child(channelId!).remove();
   }
 
   /// For Unread Msg
