@@ -80,6 +80,11 @@ class FRTDBChatUtils {
     }
   }
 
+  /// Dispose 
+  Future<void> disposeChannel({String? channelId}) async {
+    await _firebaseDatabase.child(channelId!).remove();
+  }
+
   /// For Unread Msg
   Future<void> unreadMessagesCount({String? currentUser, String? channelId, int? unreadMessagesCount}) async {
     try {
